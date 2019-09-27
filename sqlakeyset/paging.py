@@ -64,10 +64,13 @@ def value_from_thing(thing, desc, ocol):
     entity = desc['entity']
     expr = desc['expr']
 
-    try:
-        is_a_table = entity == expr
-    except sqlalchemy.exc.ArgumentError:
+    if entity is None:
         is_a_table = False
+    else:
+        try:
+            is_a_table = entity == expr
+        except sqlalchemy.exc.ArgumentError:
+            is_a_table = False
 
     if is_a_table:  # is a table
         mapper = class_mapper(desc['type'])
@@ -78,7 +81,7 @@ def value_from_thing(thing, desc, ocol):
             raise ValueError
 
     # is an attribute
-    if hasattr(expr, 'info'):
+    if hasattr(expr, 'info') and expr.info:
         mapper = expr.parent
         tname = mapper.local_table.description
 
